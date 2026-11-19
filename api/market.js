@@ -2,7 +2,7 @@
 const L = require('./_lib');
 const ANTH = 'Pren1FvFX6J3E4kXhJuCiAD5aDmGEb7qJRncwA8Lkhw';
 const DS = 'https://api.dexscreener.com';
-const MAJOR = /^(sol|wsol|usdc|usdt|usd1|pyusd|jup|jlp|btc|wbtc|cbbtc|eth|weth|msol|jitosol|bsol|inf|ray|bonk)$/i;
+const MAJOR = /^(sol|wsol|usdc|usdt|usd1|pyusd|jup|jlp|btc|wbtc|cbbtc|eth|weth|msol|jitosol|bsol|inf|ray|bonk|cash|hype|usds|usde|eurc|xaut|paxg)$|usd/i;
 const STOCK = t => /^[A-Z]{1,6}x$/.test(t.symbol || '') || /xstock|tokenized|\bstock\b|\binc\.?$|\bcorp|holdings|class a|\betf\b|prestocks/i.test(t.name || '') || (t.tags || []).some(g => /stock|rwa/i.test(g));
 const pair = p => ({ pair: p.pairAddress, dex: p.dexId, mint: p.baseToken.address, sym: p.baseToken.symbol, name: p.baseToken.name, quote: p.quoteToken.symbol, icon: p.info?.imageUrl || null,
   price: +p.priceUsd || 0, mcap: p.marketCap || p.fdv || 0, liq: p.liquidity?.usd || 0, vol24: p.volume?.h24 || 0, vol1h: p.volume?.h1 || 0, ch5m: p.priceChange?.m5 ?? null, ch1h: p.priceChange?.h1 ?? null, ch24h: p.priceChange?.h24 ?? null,
