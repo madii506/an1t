@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>An1t: your ant trades for you</title>
+<meta name="description" content="Launch a coin. Get your own agent terminal. Your ant trades for you. Paired to $ANTHROPIC on Solana.">
+<meta property="og:title" content="An1t"><meta property="og:description" content="Launch a coin. Get your own agent terminal. Your ant trades for you.">
+<meta property="og:image" content="/assets/og-pfp.png"><meta name="twitter:card" content="summary">
+<link rel="icon" href="/assets/mark.svg" type="image/svg+xml">
+<style>
+@font-face{font-family:FR;src:url(/assets/fraunces-latin-900-normal.woff2) format('woff2');font-weight:900;font-display:swap}
+@font-face{font-family:IN;src:url(/assets/inter-latin-400-normal.woff2) format('woff2');font-weight:400;font-display:swap}
+@font-face{font-family:IN;src:url(/assets/inter-latin-500-normal.woff2) format('woff2');font-weight:500;font-display:swap}
+@font-face{font-family:IN;src:url(/assets/inter-latin-600-normal.woff2) format('woff2');font-weight:600;font-display:swap}
+@font-face{font-family:IN;src:url(/assets/inter-latin-700-normal.woff2) format('woff2');font-weight:700;font-display:swap}
+@font-face{font-family:JB;src:url(/assets/jetbrains-mono-latin-500-normal.woff2) format('woff2');font-weight:500;font-display:swap}
+@font-face{font-family:JB;src:url(/assets/jetbrains-mono-latin-700-normal.woff2) format('woff2');font-weight:700;font-display:swap}
+:root{--bg:#f4eadb;--paper:#fbf6ee;--ink:#17110c;--mut:#6f5e4b;--faint:#a8957d;--line:rgba(23,17,12,.13);--line2:rgba(23,17,12,.24);--org:#ff5a1a;--up:#1d8a4e;--dn:#c8381e;--con:#17110c;--conT:#f4eadb}
+*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--ink);font:500 14px/1.5 IN,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+button,input,textarea,select{font:inherit;color:inherit}a{color:inherit}
+.mono{font-family:JB,ui-monospace,monospace}.up{color:var(--up)}.dn{color:var(--dn)}.org{color:var(--org)}.mut{color:var(--mut)}
+.mark{display:inline-block;color:var(--ink)}.mark svg{display:block;width:100%;height:100%}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:48px;padding:0 24px;border-radius:999px;border:1.5px solid var(--ink);background:transparent;cursor:pointer;font-weight:600;text-decoration:none;transition:transform .15s,background .15s}
+.btn:hover{transform:translateY(-1px);background:rgba(23,17,12,.05)}.btn.ink{background:var(--ink);color:var(--bg)}.btn.ink:hover{background:#2a2019}.btn.org{background:var(--org);border-color:var(--org);color:#fff}
+.btn.sm{height:34px;padding:0 14px;font-size:13px}.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+/* ---------- home */
+#home{position:relative;min-height:100vh;display:flex;flex-direction:column;overflow:hidden}
+#home .floor{position:absolute;inset:0;background:url(/assets/floor.jpg) center 62%/cover no-repeat;opacity:.55}
+#home .floor:after{content:"";position:absolute;inset:0;background:radial-gradient(ellipse 46% 52% at 50% 46%,rgba(250,244,234,.97),rgba(246,237,223,.82) 55%,rgba(244,234,219,.15) 100%)}
+.hnav{position:relative;z-index:2;display:flex;justify-content:space-between;align-items:center;padding:22px 32px}
+.hnav .l{font:500 12px JB;letter-spacing:.14em;text-transform:uppercase;color:var(--mut);display:flex;align-items:center;gap:8px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--org);box-shadow:0 0 0 4px rgba(255,90,26,.15);animation:pulse 1.6s infinite}@keyframes pulse{50%{box-shadow:0 0 0 7px rgba(255,90,26,0)}}
+.hero{position:relative;z-index:2;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px 24px 70px}
+.logo{display:flex;align-items:center;gap:22px}.logo .mark{width:150px;height:134px}
+.logo h1{margin:0;font:900 clamp(84px,13vw,176px)/.9 FR,serif;letter-spacing:-.04em}.logo h1 b,.wm b{color:var(--org);font-weight:900}
+.tag{margin:26px 0 0;font-size:clamp(17px,2vw,21px);line-height:1.45;color:#3a2e22;max-width:640px}
+.btns{display:flex;gap:12px;margin-top:34px;flex-wrap:wrap;justify-content:center}
+.hstat{display:flex;gap:10px;margin-top:30px;flex-wrap:wrap;justify-content:center}
+.pill{display:inline-flex;align-items:center;gap:8px;height:32px;padding:0 14px;border-radius:999px;border:1px solid var(--line2);background:rgba(251,246,238,.75);font:500 12px JB;color:#3a2e22}
+.hfoot{position:relative;z-index:2;text-align:center;padding:18px;font:500 11px JB;letter-spacing:.06em;color:var(--mut)}
+/* ---------- terminal */
+#term{min-height:100vh;display:flex;flex-direction:column}#term[hidden],#home[hidden]{display:none}
+.tbar{position:sticky;top:0;z-index:20;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:16px;padding:12px 20px;background:rgba(244,234,219,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.wm{display:flex;align-items:center;gap:10px;cursor:pointer;font:900 26px/1 FR,serif;letter-spacing:-.03em;background:none;border:0;padding:0}.wm .mark{width:34px;height:30px}
+.tabs{display:flex;gap:4px;background:rgba(23,17,12,.05);padding:4px;border-radius:999px}
+.tab{border:0;background:none;padding:8px 16px;border-radius:999px;cursor:pointer;font-weight:600;font-size:13px;color:var(--mut)}.tab.on{background:var(--ink);color:var(--bg)}
+.tr{display:flex;justify-content:flex-end;align-items:center;gap:10px}
+.ticker{overflow:hidden;white-space:nowrap;border-bottom:1px solid var(--line);background:var(--paper);font:500 12px JB;height:32px;display:flex;align-items:center}
+.ticker .run{display:inline-flex;gap:28px;padding-left:20px;animation:run 70s linear infinite}.ticker span b{font-weight:700}@keyframes run{to{transform:translateX(-50%)}}
+.pane{display:none;flex:1;min-height:0}.pane.on{display:block}
+.tgrid{display:grid;grid-template-columns:300px minmax(0,1fr) 340px;gap:14px;padding:14px 20px;height:calc(100vh - 92px - 46px)}
+.col{min-height:0;display:flex;flex-direction:column;gap:14px;overflow:auto}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:16px}
+.card h3{margin:0 0 10px;font:900 20px/1.1 FR,serif;letter-spacing:-.01em}.card h4{margin:0;font:600 11px JB;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)}
+.antid{display:flex;gap:12px;align-items:center}.antid .av{width:54px;height:54px;border-radius:14px;background:var(--bg);display:grid;place-items:center;border:1px solid var(--line)}.antid .av .mark{width:38px;height:34px}
+.antid .nm{font:900 22px/1 FR,serif}.st{font:600 11px JB;letter-spacing:.08em;text-transform:uppercase;display:flex;align-items:center;gap:6px;margin-top:6px;color:var(--mut)}.st i{width:7px;height:7px;border-radius:50%;background:var(--faint)}.st.awake i{background:var(--up);animation:pulse 1.6s infinite}.st.awake{color:var(--up)}
+label.f{display:block;margin-top:12px;font:600 11px JB;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)}
+.in,textarea.in,select.in{width:100%;margin-top:6px;padding:10px 12px;border-radius:10px;border:1px solid var(--line2);background:#fffdf9;font-size:14px;outline:none}.in:focus{border-color:var(--ink)}
+textarea.in{min-height:84px;resize:vertical;line-height:1.45}
+.seg{display:flex;gap:6px;margin-top:6px}.seg button{flex:1;border:1px solid var(--line2);background:#fffdf9;border-radius:10px;padding:8px 0;cursor:pointer;font-weight:600;font-size:12.5px}.seg button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tog{display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding:10px 12px;border:1px solid var(--line2);border-radius:12px;background:#fffdf9;cursor:pointer;font-weight:600;font-size:13px}
+.sw{width:38px;height:22px;border-radius:999px;background:#d8cbb8;position:relative;transition:.2s}.sw:after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:.2s}.tog.on .sw{background:var(--org)}.tog.on .sw:after{left:19px}
+.note{font-size:12px;color:var(--mut);margin-top:8px;line-height:1.45}
+/* console */
+.console{flex:1;min-height:0;background:var(--con);color:var(--conT);border-radius:18px;display:flex;flex-direction:column;overflow:hidden;border:1px solid #000}
+.chead{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid rgba(244,234,219,.12)}
+.chead .t{font:700 12px JB;letter-spacing:.12em;text-transform:uppercase;display:flex;align-items:center;gap:10px}.chead .t .mark{width:22px;height:20px;color:var(--conT);--eye:#17110c}
+.chead .a{display:flex;gap:8px}.cbtn{height:30px;padding:0 12px;border-radius:999px;border:1px solid rgba(244,234,219,.25);background:none;color:var(--conT);font:600 12px JB;cursor:pointer}.cbtn.org{background:var(--org);border-color:var(--org);color:#fff}
+.log{flex:1;overflow:auto;padding:12px 18px;font:500 12.5px/1.65 JB}
+.ln{display:grid;grid-template-columns:62px 82px 1fr;gap:10px;padding:3px 0;border-bottom:1px dashed rgba(244,234,219,.06)}.ln .tm{color:rgba(244,234,219,.4)}.ln .k{font-weight:700;letter-spacing:.06em}
+.k.scan{color:#7cc4ff}.k.think{color:#d7b6ff}.k.move{color:var(--org)}.k.trade{color:#5fe39a}.k.wait{color:rgba(244,234,219,.55)}.k.err{color:#ff8a7a}.k.you{color:#ffd166}
+.prop{margin:0 18px 14px;padding:14px;border-radius:14px;background:#241a12;border:1px solid rgba(255,90,26,.45);display:none}.prop.on{display:block}
+.prop .h{display:flex;justify-content:space-between;align-items:center;font:700 13px JB}.prop .r{margin:8px 0 12px;color:rgba(244,234,219,.82);font-size:13px;line-height:1.5}.prop .b{display:flex;gap:8px}
+.cmd{display:flex;align-items:center;gap:10px;padding:10px 18px;border-top:1px solid rgba(244,234,219,.12);font:500 13px JB}.cmd input{flex:1;background:none;border:0;outline:none;color:var(--conT)}.cmd .p{color:var(--org)}
+/* lists */
+.anth .px{font:900 34px/1 FR,serif;margin:6px 0}.kv{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;margin-top:10px;font-size:12.5px}.kv span{color:var(--mut);font:500 11px JB;letter-spacing:.06em;text-transform:uppercase;display:block}.kv b{font:600 13px JB}
+.list{display:flex;flex-direction:column}.it{display:grid;grid-template-columns:28px 1fr auto;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px;text-decoration:none}.it:last-child{border-bottom:0}
+.ic{width:28px;height:28px;border-radius:8px;background:var(--bg);border:1px solid var(--line);display:grid;place-items:center;font:700 11px JB;overflow:hidden}.ic img{width:100%;height:100%;object-fit:cover}
+.it .n b{font-weight:700}.it .n small{display:block;color:var(--mut);font:500 11px JB}.it .v{text-align:right;font:600 12px JB}.it .v small{display:block;font-weight:500}
+.pos .it{grid-template-columns:28px 1fr auto auto}.empty{padding:16px 0;color:var(--mut);font-size:13px;text-align:center}
+/* board / launch / how */
+.wrap{max-width:1240px;margin:0 auto;padding:26px 20px 60px}.ph{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:16px;gap:16px}.ph h2{margin:0;font:900 40px/1 FR,serif;letter-spacing:-.02em}.ph p{margin:6px 0 0;color:var(--mut)}
+.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px}.cc{display:block;text-decoration:none}.cc .top{display:flex;gap:12px;align-items:center}.cc .ic{width:42px;height:42px;border-radius:12px}.cc .nm{font:900 18px/1.1 FR,serif}.cc .nm small{display:block;font:500 11px JB;color:var(--mut);margin-top:2px}
+table.tb{width:100%;border-collapse:collapse;font-size:13px}.tb th{text-align:left;font:600 11px JB;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);padding:10px 8px;border-bottom:1px solid var(--line2)}.tb td{padding:10px 8px;border-bottom:1px solid var(--line)}.tb td.n{font:600 12.5px JB}
+.lgrid{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:16px}.drop{display:grid;place-items:center;height:150px;border:1.5px dashed var(--line2);border-radius:14px;background:#fffdf9;cursor:pointer;color:var(--mut);font-size:13px;overflow:hidden}.drop img{width:100%;height:100%;object-fit:cover}
+.pairbox{display:flex;justify-content:space-between;align-items:center;margin-top:6px;padding:12px;border-radius:12px;background:var(--ink);color:var(--bg)}.pairbox small{font:500 11px JB;opacity:.7}
+.steps{counter-reset:s;display:grid;gap:10px;margin:0;padding:0;list-style:none}.steps li{counter-increment:s;display:grid;grid-template-columns:34px 1fr;gap:12px;align-items:start}.steps li:before{content:counter(s);width:34px;height:34px;border-radius:50%;background:var(--ink);color:var(--bg);display:grid;place-items:center;font:700 13px JB}
+.steps b{display:block;font-size:15px}.steps span{color:var(--mut);font-size:13.5px}
+.hgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.hgrid .card .n{font:900 34px FR;color:var(--org)}
+.disc{margin-top:18px;font-size:12px;color:var(--mut);line-height:1.6}
+.colony{margin-bottom:14px}.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.chip{height:30px;padding:0 12px;border-radius:999px;border:1px solid var(--line2);background:#fffdf9;cursor:pointer;font:600 12px IN;display:inline-flex;align-items:center;gap:6px}.chip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}.chip i{width:6px;height:6px;border-radius:50%;background:var(--faint)}.chip.awake i{background:#3ddc84}
+.presets{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}.presets button{border:1px dashed var(--line2);background:none;border-radius:999px;padding:3px 10px;font:600 11px IN;cursor:pointer;color:var(--mut)}.presets button:hover{color:var(--ink);border-color:var(--ink)}
+.badge{font:600 10px JB;letter-spacing:.06em;padding:3px 8px;border-radius:999px;border:1px solid rgba(244,234,219,.25);color:rgba(244,234,219,.7);text-transform:none}.badge.model{border-color:#5fe39a;color:#5fe39a}
+.row3{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:14px}.lnk{border:0;background:none;color:var(--mut);font:600 11px JB;cursor:pointer;text-decoration:underline}
+.chart{height:120px;margin-top:10px}.chart svg{width:100%;height:100%;display:block}.tfs{display:flex;gap:4px;margin-top:6px}.tfs button{border:1px solid var(--line2);background:none;border-radius:999px;padding:2px 10px;font:600 11px JB;cursor:pointer;color:var(--mut)}.tfs button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.ipo{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}.ipo span{display:block;font:500 10px JB;letter-spacing:.06em;text-transform:uppercase;color:var(--mut)}.ipo b{font:700 13px JB}
+.sh{display:inline-flex;align-items:center;gap:4px;font:700 10.5px JB;padding:2px 7px;border-radius:999px}.sh.ok{background:rgba(29,138,78,.12);color:var(--up)}.sh.warn{background:rgba(214,140,20,.15);color:#a8660a}.sh.bad{background:rgba(200,56,30,.12);color:var(--dn)}
+.bbar{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap}h3.sub{font:900 22px FR;margin:6px 0 10px}
+.scan{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:14px}.flags{display:flex;flex-direction:column;gap:6px;margin-top:6px}.flag{display:flex;gap:10px;align-items:center;font-size:13.5px}.flag b{width:10px;height:10px;border-radius:50%;flex:none}.flag.ok b{background:var(--up)}.flag.warn b{background:#d68c14}.flag.bad b{background:var(--dn)}
+.verdict{margin-top:12px;padding:14px;border-radius:14px;background:var(--ink);color:var(--bg)}.verdict .v{font:900 30px FR;text-transform:uppercase}.verdict .v.buy{color:#5fe39a}.verdict .v.watch{color:#ffd166}.verdict .v.avoid{color:#ff8a7a}
+.faq details{border-bottom:1px solid var(--line);padding:12px 0}.faq summary{cursor:pointer;font-weight:600}.faq p{margin:8px 0 0;color:var(--mut)}
+.k.ant{color:#ffb38a}
+@media (max-width:1180px){.row3{grid-template-columns:1fr 1fr}.scan{grid-template-columns:1fr}}@media (max-width:760px){.row3{grid-template-columns:1fr}}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);opacity:0;background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font:600 13px IN;transition:.25s;z-index:60;pointer-events:none}#toast.on{opacity:1;transform:translateX(-50%)}
+.modal{position:fixed;inset:0;z-index:50;background:rgba(23,17,12,.4);display:none;place-items:center;padding:20px}.modal.on{display:grid}.mbox{width:min(420px,100%);background:var(--paper);border-radius:18px;padding:22px;border:1px solid var(--line)}.wopt{display:flex;justify-content:space-between;width:100%;padding:14px;border:1px solid var(--line2);border-radius:12px;background:#fffdf9;margin-top:8px;cursor:pointer;font-weight:600}
+@media (max-width:1180px){.tgrid{grid-template-columns:280px minmax(0,1fr);height:auto}.tgrid .r{grid-column:1/-1}.console{min-height:560px}.hgrid{grid-template-columns:1fr 1fr}.lgrid{grid-template-columns:1fr}}
+@media (max-width:760px){.tgrid .c{order:-1}.console{min-height:520px}#tAnth{display:none}.tbar{grid-template-columns:1fr auto;padding:10px 14px}.tabs{grid-column:1/-1;order:3;overflow:auto}.tgrid{grid-template-columns:1fr;padding:12px}.logo{gap:12px}.logo .mark{width:84px;height:76px}.hnav{padding:16px}.ln{grid-template-columns:52px 1fr}.ln .tm{display:none}.row2{grid-template-columns:1fr}.hgrid{grid-template-columns:1fr}.btn{height:46px}}
+</style></head>
+<body>
+<section id="home">
+  <div class="floor"></div>
+  <nav class="hnav"><div class="l"></div><a class="btn sm" id="hx" href="https://x.com/" target="_blank" rel="noopener">𝕏</a></nav>
+  <main class="hero">
+    <div class="logo"><h1>An<b>1</b>t</h1></div>
+    <p class="tag">Your ant trades for you.</p>
+    <div class="btns"><button class="btn ink" id="enter">Enter terminal →</button><button class="btn" data-go="launch">Launch a coin</button><button class="btn" data-go="board">See the board</button></div>
+  </main>
+</section>
+
+<section id="term" hidden>
+  <header class="tbar">
+    <button class="wm" id="toHome"><span class="mark" data-mark></span><span>An<b>1</b>t</span></button>
+    <nav class="tabs" id="tabs"><button class="tab on" data-t="terminal">terminal</button><button class="tab" data-t="scan">scan</button><button class="tab" data-t="launch">launch</button><button class="tab" data-t="board">board</button><button class="tab" data-t="how">how it works</button></nav>
+    <div class="tr"><span class="pill mono" id="tAnth">$ANTHROPIC —</span><button class="btn sm ink" id="wal">connect wallet</button></div>
+  </header>
+  <div class="ticker"><div class="run" id="tick"></div></div>
+
+  <div class="pane on" id="p-terminal"><div class="tgrid">
+    <aside class="col l">
+      <div class="card">
+        <div class="colony"><h4>your colony</h4><div class="chips" id="colony"></div></div>
+        <div class="antid"><div class="av"><span class="mark" data-mark></span></div><div><div class="nm" id="antName">An1t</div><div class="st" id="antSt"><i></i><span>asleep</span></div></div></div>
+        <label class="f">ant name</label><input class="in" id="fName" maxlength="20" value="An1t">
+        <label class="f">mandate · tell it how to trade</label><div class="presets" id="presets"></div><textarea class="in" id="fMandate" maxlength="600">Trade fresh Solana memecoins with real organic volume. Only buy coins moving up with more buyers than sellers. Take profit fast, cut losers early.</textarea>
+        <label class="f">risk</label><div class="seg" id="fStyle"><button data-s="careful">careful</button><button data-s="steady" class="on">steady</button><button data-s="antsy">antsy</button></div>
+        <div class="row2"><div><label class="f">per trade · SOL</label><input class="in mono" id="fSize" type="number" min="0.01" step="0.01" value="0.05"></div><div><label class="f">max trades / day</label><input class="in mono" id="fMax" type="number" min="1" max="50" value="6"></div></div>
+        <div class="tog" id="fAuto"><span>autopilot</span><span class="sw"></span></div>
+        <p class="note" id="autoNote">Off: your ant proposes each trade. On: it opens the trade in your wallet by itself, and you only confirm.</p>
+      </div>
+      <div class="card"><h4>your coins</h4><div class="list" id="myCoins"><div class="empty">No coin bound yet. Launch one, then bind its CA so your ant runs it.</div></div><button class="btn sm" style="width:100%;margin-top:10px" data-go="launch">launch + bind a coin</button></div>
+    </aside>
+    <main class="col c">
+      <div class="console">
+        <div class="chead"><div class="t"><span class="mark" data-mark></span><span id="cTitle">An1t console</span><span class="badge" id="brain">brain · —</span></div><div class="a"><button class="cbtn" id="bThink">think now</button><button class="cbtn org" id="bWake">wake up</button></div></div>
+        <div class="log" id="log"></div>
+        <div class="prop" id="prop"><div class="h"><span id="propH">BUY</span><span class="mut" id="propS"></span></div><div class="r" id="propR"></div><div class="b"><button class="cbtn org" id="propGo">approve + sign</button><button class="cbtn" id="propNo">skip</button></div></div>
+        <div class="cmd"><span class="p">an1t ›</span><input id="cmd" placeholder="ask your ant anything, or type help · wake · think · buy BONK 0.05 · scan &lt;CA&gt;" autocomplete="off"></div>
+      </div>
+      <div class="row3">
+        <div class="card pos"><div style="display:flex;justify-content:space-between;align-items:center"><h4>positions</h4><span class="mono mut" id="posSum" style="font-size:12px"></span></div><div class="list" id="pos"><div class="empty">No positions yet.</div></div></div>
+        <div class="card"><h4>performance</h4><div class="kv" id="stats"></div></div>
+        <div class="card"><div style="display:flex;justify-content:space-between;align-items:center"><h4>trade history</h4><button class="lnk" id="hClear">clear</button></div><div class="list" id="hist"><div class="empty">No trades yet.</div></div></div>
+      </div>
+    </main>
+    <aside class="col r">
+      <div class="card anth"><h4>the pair · $ANTHROPIC</h4><div class="px mono" id="aPx">—</div><div class="mono" id="aCh" style="font-size:13px">—</div>
+        <div class="chart" id="aChart"><div class="empty">loading chart…</div></div><div class="tfs" id="aTf"><button data-tf="15m">15m</button><button data-tf="1h" class="on">1h</button><button data-tf="4h">4h</button><button data-tf="1d">1d</button></div><div class="kv"><div><span>market cap</span><b id="aMc">—</b></div><div><span>24h volume</span><b id="aVol">—</b></div><div><span>liquidity</span><b id="aLiq">—</b></div><div><span>pools</span><b id="aPools">—</b></div></div>
+        <div class="ipo"><div><span>IPO price</span><b>$83</b></div><div><span>Nasdaq</span><b>ANT · Nov 19</b></div><div><span>raised</span><b>~$81B</b></div></div><p class="note">$ANTHROPIC is the PreStocks token on Solana, a third-party pre-IPO token, not an Anthropic share.</p></div>
+      <div class="card"><div style="display:flex;justify-content:space-between"><h4>paired to $ANTHROPIC</h4><span class="mono mut" id="pN" style="font-size:11px"></span></div><div class="list" id="paired"><div class="empty">loading…</div></div></div>
+      <div class="card"><div style="display:flex;justify-content:space-between"><h4>what your ant sees</h4><span class="mono mut" style="font-size:11px">1h · live</span></div><div class="list" id="trend"><div class="empty">loading…</div></div></div>
+    </aside>
+  </div></div>
+
+  <div class="pane" id="p-scan"><div class="wrap">
+    <div class="ph"><div><h2>Scan any coin</h2><p>Paste a Solana mint. Your ant reads the market, checks the risk flags and gives a verdict.</p></div></div>
+    <div class="card" style="display:flex;gap:10px;align-items:center"><input class="in mono" id="sCa" placeholder="paste a mint address" style="margin:0"><button class="btn ink" id="sGo">scan</button></div>
+    <div id="sOut" style="margin-top:14px"></div>
+    <div class="card" style="margin-top:14px"><h4>recent scans</h4><div class="list" id="sRecent"><div class="empty">Nothing scanned yet. Try a coin from the board.</div></div></div>
+  </div></div>
+
+  <div class="pane" id="p-launch"><div class="wrap">
+    <div class="ph"><div><h2>Launch a coin. Get an ant.</h2><p>Your coin trades against $ANTHROPIC, and it comes with its own agent terminal.</p></div></div>
+    <div class="lgrid">
+      <div class="card">
+        <h3>1 · the coin</h3>
+        <div class="row2"><div><label class="f">name</label><input class="in" id="lName" maxlength="32" placeholder="Ant Capital"></div><div><label class="f">ticker</label><input class="in mono" id="lSym" maxlength="10" placeholder="ANTCAP"></div></div>
+        <label class="f">image</label><label class="drop" id="lDrop"><span>drop or pick a PNG / JPG</span><input type="file" id="lImg" accept="image/*" hidden></label>
+        <label class="f">description</label><textarea class="in" id="lDesc" maxlength="400" placeholder="What is your coin about?"></textarea>
+        <div class="row2"><div><label class="f">X</label><input class="in" id="lX" placeholder="https://x.com/…"></div><div><label class="f">website</label><input class="in" id="lWeb" placeholder="https://…"></div></div>
+        <label class="f">pair</label><div class="pairbox"><div><b>$ANTHROPIC</b><br><small class="mono">Pren1FvFX6J3E4kXhJuCiAD5aDmGEb7qJRncwA8Lkhw</small></div><span class="mono" style="font-size:11px">FIXED</span></div>
+        <h3 style="margin-top:22px">2 · the ant</h3>
+        <label class="f">ant name</label><input class="in" id="lAnt" maxlength="20" placeholder="Worker #1">
+        <label class="f">mandate</label><textarea class="in" id="lMandate" maxlength="600" placeholder="How should your ant trade? Plain English."></textarea>
+        <label class="f">risk</label><div class="seg" id="lStyle"><button data-s="careful">careful</button><button data-s="steady" class="on">steady</button><button data-s="antsy">antsy</button></div>
+        <div style="display:flex;gap:10px;margin-top:18px;flex-wrap:wrap"><button class="btn org" id="lGo">launch on pump.fun ↗</button><button class="btn" id="lSave">save draft</button></div>
+        <p class="note">Opens pump.fun's create page with your draft saved here. When it's live, bind the CA below and your ant starts running the coin's terminal.</p>
+      </div>
+      <div class="col" style="overflow:visible">
+        <div class="card"><h3>3 · bind your ant</h3><label class="f">coin CA</label><input class="in mono" id="bCa" placeholder="paste the mint address"><button class="btn ink" style="width:100%;margin-top:12px" id="bGo">bind ant to coin</button><p class="note">The terminal reads the coin live (price, market cap, holders, trades) and your ant trades with the mandate you set.</p></div>
+        <div class="card"><h4>preview</h4><div style="display:flex;gap:12px;align-items:center;margin-top:10px"><div class="ic" id="pvImg" style="width:56px;height:56px;border-radius:14px"></div><div><div style="font:900 22px FR" id="pvName">Your coin</div><div class="mono mut" id="pvSym">$TICKER / $ANTHROPIC</div></div></div><p class="note" id="pvAnt">ant: —</p></div>
+      </div>
+    </div>
+  </div></div>
+
+  <div class="pane" id="p-board"><div class="wrap">
+    <div class="ph"><div><h2>The board</h2><p>Every coin trading against $ANTHROPIC, and the hottest coins your ants are watching.</p></div><span class="pill mono" id="bAt">—</span></div>
+    <div class="bbar"><input class="in" id="bQ" placeholder="filter by name or ticker" style="margin:0;max-width:320px"><select class="in" id="bSort" style="margin:0;max-width:200px"><option value="mcap">market cap</option><option value="ch1h">1h change</option><option value="ch24h">24h change</option><option value="vol">volume</option></select></div>
+    <h3 class="sub">Paired to $ANTHROPIC</h3>
+    <div class="cgrid" id="bPaired"></div>
+    <div class="card" style="margin-top:16px;overflow:auto"><h3>Trending on Solana · 1h</h3><table class="tb"><thead><tr><th>coin</th><th>price</th><th>mcap</th><th>1h</th><th>24h</th><th>vol 1h</th><th>liq</th><th>organic</th><th>top 10</th><th>safety</th><th></th></tr></thead><tbody id="bTrend"></tbody></table></div>
+  </div></div>
+
+  <div class="pane" id="p-how"><div class="wrap">
+    <div class="ph"><div><h2>How An1t works</h2><p>A coin, a pair and an ant that trades.</p></div></div>
+    <div class="hgrid">
+      <div class="card"><div class="n">01</div><h3>Launch</h3><p class="mut">Name, ticker, image. Your coin trades against $ANTHROPIC, the Anthropic token on Solana.</p></div>
+      <div class="card"><div class="n">02</div><h3>Give it a mandate</h3><p class="mut">Tell your ant how to trade in plain English, pick a risk level, a trade size and a daily cap.</p></div>
+      <div class="card"><div class="n">03</div><h3>It watches the market</h3><p class="mut">Your ant reads live Solana markets (Jupiter, Dexscreener): momentum, organic volume, liquidity, buyers vs sellers.</p></div>
+      <div class="card"><div class="n">04</div><h3>It trades for you</h3><p class="mut">It picks a move and explains why. On autopilot it opens each trade in your wallet. Swaps run through Jupiter.</p></div>
+    </div>
+    <div class="card" style="margin-top:14px"><h3>The ant's brain</h3><p class="mut">Each think cycle sends your mandate, limits, holdings and the live board to an Anthropic model (Claude Haiku, through Vercel's AI Gateway). It must pick one coin from the board, or wait. It can't invent coins, and it can't move more than your trade size. If the model is unreachable, plain rules take over and the console says so.</p>
+      <ul class="steps" style="margin-top:14px"><li><div><b>Your keys stay yours</b><span>Every trade is a Jupiter swap your wallet signs. An1t never holds your funds.</span></div></li><li><div><b>Limits you set</b><span>Per-trade size, trades per day, and take-profit / stop levels by risk style.</span></div></li><li><div><b>Everything in the open</b><span>The console shows every scan, thought and move with the numbers behind it.</span></div></li></ul></div>
+    <div class="card" style="margin-top:14px"><h3>FAQ</h3><div class="faq">
+      <details><summary>Does An1t hold my money?</summary><p>No. Every trade is a Jupiter swap built for your wallet and signed by you. An1t never sees your keys.</p></details>
+      <details><summary>What does autopilot do?</summary><p>With autopilot on, your ant opens each trade in your wallet as soon as it decides, within your trade size and daily cap. You confirm in the wallet.</p></details>
+      <details><summary>What is $ANTHROPIC?</summary><p>The Anthropic PreStocks token on Solana, a third-party pre-IPO token. Coins launched here trade against it. It is not an Anthropic share and An1t is not affiliated with Anthropic.</p></details>
+      <details><summary>What can I tell my ant?</summary><p>Anything in plain English: what to buy, what to avoid, when to take profit. Type questions in the console and it answers with live data.</p></details>
+      <details><summary>Can I run more than one ant?</summary><p>Yes. Add up to five ants to your colony, each with its own mandate and risk. Awake ants take turns reading the market.</p></details>
+      <details><summary>What does the scanner check?</summary><p>Mint and freeze authority, top 10 holder share, liquidity against market cap, buys vs sells, organic score and age, then your ant gives a buy, watch or avoid verdict.</p></details>
+    </div></div>
+    <p class="disc">An1t is independent and not affiliated with Anthropic. $ANTHROPIC is a third-party pre-IPO token on Solana (PreStocks), not an Anthropic share. Memecoins and automated trading are risky and can lose everything. Nothing here is financial advice.</p>
+  </div></div>
+</section>
+
+<div class="modal" id="mWal"><div class="mbox"><h3 style="margin:0;font:900 24px FR">Connect a wallet</h3><div id="wList"></div></div></div>
+<div id="toast"></div>
+<script src="/assets/web3.min.js"></script>
+<script src="/assets/floor.js"></script>
+<script src="/assets/app.js"></script>
+</body></html>

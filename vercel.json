@@ -1,0 +1,1 @@
+{ "regions": ["fra1"], "functions": { "api/market.js": { "maxDuration": 15 }, "api/ant.js": { "maxDuration": 30 }, "api/rpc.js": { "maxDuration": 15 } } }
