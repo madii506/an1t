@@ -49,8 +49,8 @@ module.exports = async (req, res) => { try {
       body: JSON.stringify({ model: MODELS[style], max_tokens: 500, temperature: .4, messages: [{ role: 'system', content: sys }, { role: 'user', content: JSON.stringify(brief) }] }) });
     const txt = r.choices?.[0]?.message?.content || ''; const j = JSON.parse(txt.slice(txt.indexOf('{'), txt.lastIndexOf('}') + 1));
     if (['buy', 'sell', 'wait'].includes(j.action)) { if (j.action === 'wait' || coins.some(c => c.mint === j.mint) || held.some(h => h.mint === j.mint)) { out = j; source = 'model'; model = MODELS[style]; } }
-  } catch (e) { out = null; b._err = String(e.message || e).slice(0, 140); }
+  } catch (e) { out = null; b._err = String(e.message || e).slice(0, 160); }
   if (!out) out = rules({ ...b, style, coins, held });
   const sym = out.sym || (coins.find(c => c.mint === out.mint) || held.find(h => h.mint === out.mint) || {}).sym;
-  L.send(res, 200, { action: out.action, mint: out.action === 'wait' ? null : out.mint, sym: sym || null, sol: out.action === 'buy' ? size : null, reason: String(out.reason || '').slice(0, 400), thoughts: Array.isArray(out.thoughts) ? out.thoughts.slice(0, 4).map(x => String(x).slice(0, 160)) : [], source, model, note: source === 'rules' ? (b._err ? 'model unavailable, used rules' : 'rules') : null, at: Date.now() });
+  L.send(res, 200, { action: out.action, mint: out.action === 'wait' ? null : out.mint, sym: sym || null, sol: out.action === 'buy' ? size : null, reason: String(out.reason || '').slice(0, 400), thoughts: Array.isArray(out.thoughts) ? out.thoughts.slice(0, 4).map(x => String(x).slice(0, 160)) : [], source, model, note: source === 'rules' ? (b._err ? 'model unavailable, used rules' : 'rules') : null, err: b._err || null, at: Date.now() });
 } catch (e) { L.send(res, 500, { error: String(e.message || e) }); } };

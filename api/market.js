@@ -3,6 +3,7 @@ const L = require('./_lib');
 const ANTH = 'Pren1FvFX6J3E4kXhJuCiAD5aDmGEb7qJRncwA8Lkhw';
 const DS = 'https://api.dexscreener.com';
 const MAJOR = /^(sol|wsol|usdc|usdt|usd1|pyusd|jup|jlp|btc|wbtc|cbbtc|eth|weth|msol|jitosol|bsol|inf|ray|bonk)$/i;
+const STOCK = t => /^[A-Z]{1,6}x$/.test(t.symbol || '') || /xstock|tokenized|\bstock\b|\binc\.?$|\bcorp|holdings|class a|\betf\b|prestocks/i.test(t.name || '') || (t.tags || []).some(g => /stock|rwa/i.test(g));
 const pair = p => ({ pair: p.pairAddress, dex: p.dexId, mint: p.baseToken.address, sym: p.baseToken.symbol, name: p.baseToken.name, quote: p.quoteToken.symbol, icon: p.info?.imageUrl || null,
   price: +p.priceUsd || 0, mcap: p.marketCap || p.fdv || 0, liq: p.liquidity?.usd || 0, vol24: p.volume?.h24 || 0, vol1h: p.volume?.h1 || 0, ch5m: p.priceChange?.m5 ?? null, ch1h: p.priceChange?.h1 ?? null, ch24h: p.priceChange?.h24 ?? null,
   buys: p.txns?.h24?.buys || 0, sells: p.txns?.h24?.sells || 0, created: p.pairCreatedAt || null, url: p.url, x: (p.info?.socials || []).find(s => s.type === 'twitter')?.url || null, site: (p.info?.websites || [])[0]?.url || null });
@@ -23,7 +24,7 @@ module.exports = async (req, res) => { try {
     for (const src of [pools, own]) if (src.status === 'fulfilled' && Array.isArray(src.value)) for (const p of src.value) if (p.quoteToken?.address === ANTH && p.baseToken.address !== ANTH) { const c = pair(p); const o = seen.get(c.mint); if (!o || c.liq > o.liq) seen.set(c.mint, c); }
     const paired = [...seen.values()].sort((a, b) => b.mcap - a.mcap).slice(0, 40);
     const tm = new Map();
-    for (const src of [trend, organic]) if (src.status === 'fulfilled' && Array.isArray(src.value)) for (const t of src.value) { const x = jtok(t); if (!x.mint || MAJOR.test(x.sym) || x.sus || x.liq < 8000 || x.mcap < 30000 || tm.has(x.mint)) continue; tm.set(x.mint, x); }
+    for (const src of [trend, organic]) if (src.status === 'fulfilled' && Array.isArray(src.value)) for (const t of src.value) { const x = jtok(t); if (!x.mint || STOCK(t) || MAJOR.test(x.sym) || x.sus || x.liq < 8000 || x.mcap < 30000 || tm.has(x.mint)) continue; tm.set(x.mint, x); }
     const trending = [...tm.values()].sort((a, b) => b.vol1h - a.vol1h).slice(0, 30);
     if (!anthropic && !trending.length) throw new Error('market data unavailable');
     return { anthropic, paired, trending, at: Date.now(), partial: [own, pools, trend, organic].some(s => s.status !== 'fulfilled') };
